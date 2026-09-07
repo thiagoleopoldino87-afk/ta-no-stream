@@ -660,7 +660,9 @@ Esperado: FALHA por módulo `lib/tmdb/parametros` não encontrado.
 
 ```ts
 // lib/tmdb/parametros.ts
-import { TODOS_OS_IDS } from '@/lib/servicos'
+// Import relativo de proposito: o apelido '@/' so existe para o TypeScript e o
+// Next.js. O Node puro nao o resolve, e a verificacao da Tarefa 6 roda no Node.
+import { TODOS_OS_IDS } from '../servicos'
 
 export type FiltrosUrl = {
   servico?: string
@@ -758,9 +760,15 @@ Sem teste automatizado: esta função só faz rede, e testar rede é testar o TM
 const BASE = 'https://api.themoviedb.org/3'
 
 export class ErroTmdb extends Error {
-  constructor(public status: number) {
+  // Declarado e atribuido separadamente. A forma curta do TypeScript
+  // — constructor(public status: number) — gera codigo, e o Node so
+  // apaga tipos, sem compilar. Ele recusaria o arquivo.
+  status: number
+
+  constructor(status: number) {
     super(`O TMDB respondeu com status ${status}`)
     this.name = 'ErroTmdb'
+    this.status = status
   }
 }
 
