@@ -23,6 +23,7 @@ assistir cada um.
 - Uma lista curada de **10 a 15 serviços principais**, definida a partir da resposta
   de `/watch/providers/movie?watch_region=BR`
 - Duas telas: catálogo e ficha do filme
+- **Herói** no topo do catálogo, visível apenas na visão sem filtros
 - **Quatro filtros:** serviço, gênero, ano e nota
 - Busca por título, com a limitação descrita abaixo
 - Seletor "meus serviços" salvo no navegador
@@ -151,8 +152,16 @@ instantâneas e reduz drasticamente as chamadas ao TMDB.
 
 ### Catálogo (`/`)
 
-É a home. Não existe página de boas-vindas: uma tela que só leva a outra tela é pedágio.
+É a home. Não existe página de boas-vindas separada: uma tela que só leva a outra tela é
+pedágio, e sem cadastro nem cobrança uma landing page não teria nada a converter.
 
+- **Herói:** faixa cinematográfica no topo com o filme mais popular do momento — imagem
+  larga (`backdrop_path`), título em caixa alta, ano, duração, nota e o botão dourado
+  "ONDE ASSISTIR". **Só aparece na visão sem filtros:** assim que qualquer filtro é
+  aplicado, o herói some e a grade assume a tela, porque quem filtra quer resultados.
+  Não custa chamada extra à API — é o primeiro resultado da própria consulta do
+  catálogo, e por isso ele é excluído da grade abaixo para não aparecer duas vezes.
+  Sem trailer embutido: o botão leva à ficha, onde o trailer vive.
 - **Filtros:** serviço, gênero, ano e nota. Barra horizontal visível no desktop; botão
   "FILTROS" que abre gaveta no celular. O botão exibe a contagem de filtros ativos.
 - **Busca:** ícone no cabeçalho. Ao buscar, a mesma página troca a fonte de dados e
@@ -209,8 +218,20 @@ não ignoradas:
 2. **"Sem animação de hover com escala ou deslocamento."** O pôster não cresce: ele
    **escurece** e revela título e disponibilidade em branco por cima. Mudança de cor e
    opacidade apenas — dentro da regra, e funciona melhor no celular, onde hover não existe.
-3. **Hero em vídeo de tela cheia.** Removido. Contradiz a decisão de não colocar pedágio
-   antes do conteúdo. O peso cinematográfico vem do próprio preto absoluto.
+3. **Hero em vídeo de tela cheia.** Reduzido, não removido. O vídeo de `100vh` sai — ele
+   seria um pedágio antes do conteúdo. Fica uma faixa de imagem estática com o filme em
+   destaque, alta o suficiente para ter presença mas deixando a grade começar na mesma
+   tela. O peso cinematográfico restante vem do próprio preto absoluto.
+
+### Origem da estrutura
+
+O arranjo da página — herói largo no topo com um título em destaque e um botão de ação,
+grade de pôsteres logo abaixo — vem de uma imagem de referência trazida pelo autor
+(conceito de landing page de streaming). **Apenas a estrutura foi aproveitada.** A
+referência usa degradê azul, destaque rosa, cantos arredondados, caixa mista e menu
+horizontal: todos os sete pontos contradizem o sistema adotado, e todos os sete foram
+resolvidos a favor do Lamborghini. Nenhuma marca de terceiros presente na referência
+é utilizada.
 
 ### Cantos
 
@@ -239,6 +260,7 @@ subir o conteúdo local para a conta, uma única vez.
 | Filme inexistente na URL | `not-found.tsx` |
 | Trailer não carrega | **Degradação graciosa**: só o trailer some, a ficha continua inteira. |
 | Filme sem pôster no TMDB | Retângulo `#202020` com o título em branco, centralizado. Nunca ícone de imagem quebrada. |
+| Filme do herói sem `backdrop_path` | Usa o próximo resultado que tenha imagem larga. Se nenhum dos primeiros tiver, o herói não é renderizado e a grade começa no topo — a página continua correta sem ele. |
 
 Os três primeiros são arquivos de nome reservado do Next.js (`loading.tsx`,
 `error.tsx`, `not-found.tsx`) — o framework os usa automaticamente, sem `if` nenhum.
