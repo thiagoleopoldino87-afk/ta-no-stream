@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Superficies — profundidade por troca de cor, nunca por sombra */
+  --color-abismo: #000000;
+  --color-fundo-profundo: #181818;
+  --color-superficie: #202020;
+
+  /* Texto */
+  --color-branco: #ffffff;
+  --color-cinza: #7d7d7d;
+  --color-cinza-claro: #969696;
+
+  /* Unica cor do sistema. So em "onde assistir" e filtro ativo. */
+  --color-dourado: #ffc000;
+  --color-dourado-escuro: #917300;
+
+  --font-display: var(--fonte-archivo), system-ui, sans-serif;
+
+  /* Cantos retos sao inegociaveis neste sistema */
+  --radius-none: 0px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-abismo);
+  color: var(--color-branco);
+}
+
+/* Titulos de destaque: caixa alta, entrelinha apertada */
+.titulo-display {
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
 }
