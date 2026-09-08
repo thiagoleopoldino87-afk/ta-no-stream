@@ -300,13 +300,13 @@ Ferramenta: **Vitest**. Os testes são escritos **antes** do código que testam.
 
 ## 11. Conformidade — checklist obrigatório antes de publicar
 
-- [ ] Logo do TMDB visível, menos proeminente que a marca do app
-- [ ] Texto: "Este aplicativo usa o TMDB e as APIs do TMDB, mas não é endossado, certificado ou aprovado pelo TMDB"
-- [ ] Atribuição ao **JustWatch** como fonte dos dados de disponibilidade
-- [ ] Link de "onde assistir" apontando para a página do TMDB, nunca direto para o streaming
-- [ ] Nenhum anúncio e nenhuma cobrança
-- [ ] Chave da API apenas em variável de ambiente do servidor, nunca no código nem no navegador
-- [ ] Nenhuma marca de terceiros utilizada. As referências visuais (Lamborghini e o conceito com identidade da HBO) contribuíram apenas com linguagem visual; nomes e logotipos de ambas ficam fora do app
+- [x] Logo do TMDB visível, menos proeminente que a marca do app
+- [x] Texto: "Este aplicativo usa o TMDB e as APIs do TMDB, mas não é endossado, certificado ou aprovado pelo TMDB"
+- [x] Atribuição ao **JustWatch** como fonte dos dados de disponibilidade
+- [x] Link de "onde assistir" apontando para a página do TMDB, nunca direto para o streaming
+- [x] Nenhum anúncio e nenhuma cobrança
+- [x] Chave da API apenas em variável de ambiente do servidor, nunca no código nem no navegador
+- [x] Nenhuma marca de terceiros utilizada. As referências visuais (Lamborghini e o conceito com identidade da HBO) contribuíram apenas com linguagem visual; nomes e logotipos de ambas ficam fora do app
 
 ## 12. Caminho de evolução
 

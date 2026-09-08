@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Conteiner } from '@/components/conteiner'
 import './globals.css'
@@ -71,12 +72,29 @@ function Cabecalho() {
 
 /**
  * Exigencia contratual do TMDB: sem esta atribuicao eles revogam o acesso.
- * O texto e o link para o JustWatch nao podem ser removidos.
+ * O logo, o texto e o credito ao JustWatch nao podem ser removidos.
+ *
+ * A regra deles pede que o logo apareca de forma MENOS proeminente que a marca
+ * do proprio aplicativo — dai o tamanho reduzido aqui no rodape.
  */
 function Atribuicao() {
   return (
     <footer className="mt-24 border-t border-white/5 py-10">
       <Conteiner>
+        <a
+          href="https://www.themoviedb.org"
+          target="_blank"
+          rel="noreferrer"
+          className="mb-5 inline-block opacity-70 transition-opacity hover:opacity-100"
+        >
+          <Image
+            src="/tmdb.svg"
+            alt="The Movie Database"
+            width={110}
+            height={15}
+          />
+        </a>
+
         <p className="max-w-2xl text-xs leading-relaxed text-texto-fraco">
           Este aplicativo usa o TMDB e as APIs do TMDB, mas não é endossado,
           certificado ou aprovado pelo TMDB.
