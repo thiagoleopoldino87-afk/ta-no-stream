@@ -8,19 +8,31 @@ import { EsqueletoGrade } from '@/components/esqueleto-grade'
 export default function Carregando() {
   return (
     <>
-      <div className="min-h-[420px] w-full animate-pulse bg-superficie/40 sm:min-h-[520px] lg:min-h-[600px]" />
+      <div className="min-h-[460px] w-full animate-pulse bg-superficie/40 sm:min-h-[560px] lg:min-h-[640px]" />
 
-      <Conteiner className="pt-4">
-        <div className="h-8 w-64 animate-pulse rounded-suave bg-superficie sm:h-9" />
+      <Conteiner className="pt-6">
+        <div className="h-8 w-56 animate-pulse rounded-suave bg-superficie sm:h-9" />
         <div className="mt-2 h-4 w-80 max-w-full animate-pulse rounded-suave bg-superficie" />
 
-        <div className="mt-6 flex gap-2">
-          {Array.from({ length: 4 }, (_, indice) => (
-            <div
-              key={indice}
-              className="h-9 w-24 animate-pulse rounded-grande bg-superficie"
-            />
-          ))}
+        <div className="mt-6 space-y-3">
+          <div className="flex gap-2">
+            {[168, 176, 140].map((largura) => (
+              <div
+                key={largura}
+                style={{ width: largura }}
+                className="h-11 animate-pulse rounded-grande bg-superficie"
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {[104, 80, 80, 80].map((largura, indice) => (
+              <div
+                key={indice}
+                style={{ width: largura }}
+                className="h-11 animate-pulse rounded-grande bg-superficie"
+              />
+            ))}
+          </div>
         </div>
 
         <div className="mt-8">

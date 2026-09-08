@@ -17,6 +17,15 @@ export type RespostaDescoberta = {
   total_results: number
 }
 
+export type Genero = {
+  id: number
+  nome: string
+}
+
+export type RespostaGeneros = {
+  genres: { id: number; name: string }[]
+}
+
 /** Um servico de streaming como o TMDB devolve. */
 export type ProvedorTmdb = {
   provider_id: number

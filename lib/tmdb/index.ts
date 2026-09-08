@@ -4,8 +4,10 @@ import { traduzirFilme, traduzirFilmeDetalhado } from './traduzir'
 import type {
   FilmeDetalhado,
   FilmeDetalhadoTmdb,
+  Genero,
   PaginaDeFilmes,
   RespostaDescoberta,
+  RespostaGeneros,
 } from './tipos'
 
 export const SEIS_HORAS = 60 * 60 * 6
@@ -26,6 +28,22 @@ export async function buscarFilmes(filtros: FiltrosUrl): Promise<PaginaDeFilmes>
     pagina: dados.page,
     totalDePaginas: Math.min(dados.total_pages, MAXIMO_DE_PAGINAS),
   }
+}
+
+/**
+ * Lista de generos de filme, em portugues.
+ *
+ * Muda praticamente nunca, entao fica em cache por 24h. Precisa vir da API
+ * porque o /discover filtra por ID numerico, e esses IDs sao do TMDB.
+ */
+export async function buscarGeneros(): Promise<Genero[]> {
+  const dados = await pedirAoTmdb<RespostaGeneros>(
+    '/genre/movie/list',
+    new URLSearchParams({ language: 'pt-BR' }),
+    VINTE_E_QUATRO_HORAS,
+  )
+
+  return dados.genres.map((g) => ({ id: g.id, nome: g.name }))
 }
 
 /**
@@ -67,6 +85,7 @@ export type { ParametrosCrus } from './parametros'
 export type {
   Filme,
   FilmeDetalhado,
+  Genero,
   OndeAssistir,
   PaginaDeFilmes,
   Provedor,

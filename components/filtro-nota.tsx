@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { montarEndereco } from '@/lib/enderecos'
 import type { FiltrosUrl } from '@/lib/tmdb'
 
 type Opcao = {
@@ -17,9 +18,10 @@ const OPCOES: Opcao[] = [
 /**
  * Filtro por nota minima.
  *
- * Nao usa JavaScript no navegador: como os filtros vivem na URL, cada opcao e
- * apenas um link. Isso deixa o endereco compartilhavel, faz o botao voltar do
- * navegador funcionar e permite que o Google indexe cada combinacao.
+ * Ao contrario da barra de servico/genero/ano, este NAO usa JavaScript: como
+ * sao poucas opcoes, cada uma pode ser um link comum. Isso deixa o endereco
+ * compartilhavel, faz o botao voltar funcionar e permite que o Google indexe
+ * cada combinacao.
  *
  * Por baixo vira o parametro vote_average.gte do TMDB, ja coberto por testes
  * em montarParametrosDescoberta.
@@ -40,7 +42,7 @@ export function FiltroNota({ filtros }: { filtros: FiltrosUrl }) {
         return (
           <Link
             key={opcao.rotulo}
-            href={montarEndereco(filtros, opcao.valor)}
+            href={montarEndereco({ ...filtros, nota: opcao.valor })}
             aria-label={opcao.descricao}
             aria-current={ativo ? 'true' : undefined}
             className={[
@@ -71,21 +73,4 @@ function Estrela({ ativo }: { ativo: boolean }) {
       <path d="M12 2.5l2.9 5.9 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3 1.2-6.5L2.5 9.3l6.6-.9L12 2.5z" />
     </svg>
   )
-}
-
-/**
- * Monta o endereco preservando os demais filtros.
- * A pagina e descartada de proposito: ao trocar um filtro, o certo e voltar
- * para a primeira pagina — continuar na pagina 7 de outro resultado confunde.
- */
-function montarEndereco(filtros: FiltrosUrl, nota: string | undefined): string {
-  const parametros = new URLSearchParams()
-
-  if (filtros.servico) parametros.set('servico', filtros.servico)
-  if (filtros.genero) parametros.set('genero', filtros.genero)
-  if (filtros.ano) parametros.set('ano', filtros.ano)
-  if (nota) parametros.set('nota', nota)
-
-  const consulta = parametros.toString()
-  return consulta ? `/?${consulta}` : '/'
 }

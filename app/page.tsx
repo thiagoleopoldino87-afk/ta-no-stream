@@ -1,14 +1,19 @@
+import Link from 'next/link'
+import { BarraFiltros } from '@/components/barra-filtros'
 import { Conteiner } from '@/components/conteiner'
 import { FiltroNota } from '@/components/filtro-nota'
 import { GradeFilmes } from '@/components/grade-filmes'
 import { Heroi } from '@/components/heroi'
+import { temFiltro } from '@/lib/enderecos'
 import {
   buscarFilme,
   buscarFilmes,
+  buscarGeneros,
   normalizarFiltros,
   type Filme,
   type FilmeDetalhado,
   type FiltrosUrl,
+  type Genero,
   type ParametrosCrus,
 } from '@/lib/tmdb'
 
@@ -18,7 +23,15 @@ export default async function PaginaCatalogo({
   searchParams: Promise<ParametrosCrus>
 }) {
   const filtros = normalizarFiltros(await searchParams)
-  const { filmes } = await buscarFilmes(filtros)
+
+  /*
+   * As duas buscas nao dependem uma da outra, entao vao juntas. Em sequencia,
+   * a pagina esperaria a soma dos dois tempos; assim espera so o mais lento.
+   */
+  const [{ filmes }, generos] = await Promise.all([
+    buscarFilmes(filtros),
+    buscarGeneros(),
+  ])
 
   /*
    * O heroi so aparece na visao sem filtros. Assim que a pessoa filtra algo,
@@ -38,12 +51,28 @@ export default async function PaginaCatalogo({
       {filmeDoHeroi && <Heroi filme={filmeDoHeroi} />}
 
       <Conteiner className={filmeDoHeroi ? 'pt-6' : 'pt-10'}>
-        <h2 className="titulo text-2xl sm:text-3xl">{tituloDaSecao(filtros)}</h2>
-        <p className="mt-2 text-sm text-texto-suave">
-          Disponíveis por assinatura no Brasil, sem custo extra.
-        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="titulo text-2xl sm:text-3xl">
+              {temFiltro(filtros) ? 'Resultados' : 'Em alta agora'}
+            </h2>
+            <p className="mt-2 text-sm text-texto-suave">
+              {descreverFiltros(filtros, generos)}
+            </p>
+          </div>
 
-        <div className="mt-6">
+          {temFiltro(filtros) && (
+            <Link
+              href="/"
+              className="text-sm font-medium text-destaque-suave underline underline-offset-4 transition-colors hover:text-destaque"
+            >
+              Limpar filtros
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-6 space-y-3">
+          <BarraFiltros filtros={filtros} generos={generos} />
           <FiltroNota filtros={filtros} />
         </div>
 
@@ -57,10 +86,6 @@ export default async function PaginaCatalogo({
       </Conteiner>
     </>
   )
-}
-
-function temFiltro(filtros: FiltrosUrl): boolean {
-  return Boolean(filtros.servico || filtros.genero || filtros.ano || filtros.nota)
 }
 
 /**
@@ -91,9 +116,21 @@ async function carregarDetalhes(
   }
 }
 
-function tituloDaSecao(filtros: FiltrosUrl): string {
-  if (filtros.nota) return `Filmes com nota ${filtros.nota} ou maior`
-  return 'Em alta agora'
+/** Frase em portugues descrevendo o que esta filtrado no momento. */
+function descreverFiltros(filtros: FiltrosUrl, generos: Genero[]): string {
+  if (!temFiltro(filtros)) {
+    return 'Disponíveis por assinatura no Brasil, sem custo extra.'
+  }
+
+  const partes: string[] = []
+
+  const genero = generos.find((g) => String(g.id) === filtros.genero)
+  if (genero) partes.push(genero.nome.toLowerCase())
+  if (filtros.ano) partes.push(`de ${filtros.ano}`)
+  if (filtros.nota) partes.push(`com nota ${filtros.nota} ou maior`)
+
+  const descricao = partes.length > 0 ? ` ${partes.join(', ')}` : ''
+  return `Filmes${descricao}, disponíveis por assinatura no Brasil.`
 }
 
 /** Nenhum resultado nao e erro. E resposta valida, e precisa oferecer saida. */
@@ -102,9 +139,15 @@ function EstadoVazio() {
     <div className="rounded-grande border border-white/10 bg-superficie/50 p-12 text-center">
       <p className="titulo text-xl">Nenhum filme encontrado</p>
       <p className="mx-auto mt-3 max-w-md text-sm text-texto-suave">
-        Não há filmes que atendam a essa combinação de filtros. Tente uma nota
-        mínima menor.
+        Nenhum filme atende a essa combinação de filtros. Tente afrouxar a nota
+        mínima ou escolher outro ano.
       </p>
+      <Link
+        href="/"
+        className="mt-6 inline-block rounded-grande bg-destaque px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-destaque-forte"
+      >
+        Limpar filtros
+      </Link>
     </div>
   )
 }
