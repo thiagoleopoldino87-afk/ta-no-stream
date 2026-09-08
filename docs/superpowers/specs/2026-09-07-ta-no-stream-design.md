@@ -156,8 +156,8 @@ instantâneas e reduz drasticamente as chamadas ao TMDB.
 pedágio, e sem cadastro nem cobrança uma landing page não teria nada a converter.
 
 - **Herói:** faixa cinematográfica no topo com o filme mais popular do momento — imagem
-  larga (`backdrop_path`), título em caixa alta, ano, duração, nota e o botão dourado
-  "ONDE ASSISTIR". **Só aparece na visão sem filtros:** assim que qualquer filtro é
+  larga (`backdrop_path`), título em caixa mista, ano, nota e o botão rosa
+  "Onde assistir". **Só aparece na visão sem filtros:** assim que qualquer filtro é
   aplicado, o herói some e a grade assume a tela, porque quem filtra quer resultados.
   Não custa chamada extra à API — é o primeiro resultado da própria consulta do
   catálogo, e por isso ele é excluído da grade abaixo para não aparecer duas vezes.
@@ -181,61 +181,77 @@ a mostrar só o que ela pode ver. Guardado no navegador.
 
 ## 7. Design system
 
-Base: `DESIGN-lamborghini.md`. Preto absoluto, dourado como única cor, tipografia
-grande em caixa alta, cantos retos.
+Base: a imagem de referência trazida pelo autor — um conceito de landing page de
+streaming. Azul-noite com degradê, destaque rosa-vermelho, cantos arredondados,
+sombras suaves, títulos em caixa mista.
+
+### Histórico desta decisão
+
+A primeira versão adotou o `DESIGN-lamborghini.md`: preto absoluto, dourado como única
+cor, caixa alta e cantos retos. Ela foi construída e **rejeitada pelo autor ao ver na
+tela**, com o retorno de que faltavam cores e que o resultado não se parecia com a
+referência.
+
+O conflito era estrutural, não de execução. O documento da Lamborghini proíbe
+literalmente, na seção "Don't": cores de destaque além do dourado, degradês, sombras,
+caixa baixa em títulos e layouts densos. A referência desejada é feita exatamente
+dessas cinco coisas. Duas tentativas de conciliação falharam antes de a causa ficar
+clara.
+
+O registro fica aqui porque a lição vale mais que a decisão: **sistema visual escolhido
+no papel só se prova na tela.**
 
 ### Cores
 
 | Papel | Cor |
 |---|---|
-| Fundo da página | `#000000` |
-| Superfície elevada (cartão, gaveta) | `#202020` |
-| Texto principal | `#FFFFFF` |
-| Texto secundário (ano, duração, gênero) | `#7D7D7D` |
-| **Botão "Onde assistir"** | `#FFC000` |
-| **Filtro ativo** | `#FFC000` |
-| Borda de campo | branco a 50% de opacidade |
+| Fundo profundo | `#0B1220` |
+| Superfície média | `#121C2E` |
+| Cartão / superfície | `#1B2537` |
+| Superfície elevada (hover) | `#243049` |
+| Texto principal | `#F5F7FA` |
+| Texto secundário | `#93A3BB` |
+| Texto fraco (metadados) | `#64748B` |
+| **Ação principal** | `#F0426B` |
+| Ação principal pressionada | `#D92E57` |
+| Nota / selo | `#F5B942` |
 
-O dourado aparece em **exatamente dois lugares** no app inteiro. É essa disciplina que
-faz a cor significar alguma coisa.
+O fundo é azul dessaturado, não preto puro: azul escuro lê como profundidade, preto
+chapado lê como vazio. O `body` carrega um degradê vertical sutil de `#16233A` para o
+fundo profundo, o que dá volume sem custar nenhum elemento na tela.
 
 ### Tipografia
 
-`Archivo` (Google Fonts) substitui a `LamboType`, que é proprietária da Lamborghini e
-não pode ser usada. Escolhida por ser variável em **peso e largura**, permitindo
-reproduzir a compressão dos títulos grandes do sistema original.
+- **Poppins** (600/700/800) para títulos — geométrica e cheia, funciona em tamanho grande
+- **Inter** para texto de interface — desenhada para tamanhos pequenos
 
-### Adaptações conscientes do sistema
-
-Três regras do documento original entram em conflito com um catálogo. Foram resolvidas,
-não ignoradas:
-
-1. **"Não crie layouts ocupados com muitos elementos pequenos."** No site original,
-   quem carrega o peso emocional é a fotografia do carro. Aqui, esse papel é do
-   **pôster do filme**. A grade respeita a regra desde que os pôsteres sejam grandes e
-   o preto entre eles generoso — 2 colunas no celular, 4 no desktop, nunca miniaturas
-   espremidas.
-2. **"Sem animação de hover com escala ou deslocamento."** O pôster não cresce: ele
-   **escurece** e revela título e disponibilidade em branco por cima. Mudança de cor e
-   opacidade apenas — dentro da regra, e funciona melhor no celular, onde hover não existe.
-3. **Hero em vídeo de tela cheia.** Reduzido, não removido. O vídeo de `100vh` sai — ele
-   seria um pedágio antes do conteúdo. Fica uma faixa de imagem estática com o filme em
-   destaque, alta o suficiente para ter presença mas deixando a grade começar na mesma
-   tela. O peso cinematográfico restante vem do próprio preto absoluto.
-
-### Origem da estrutura
-
-O arranjo da página — herói largo no topo com um título em destaque e um botão de ação,
-grade de pôsteres logo abaixo — vem de uma imagem de referência trazida pelo autor
-(conceito de landing page de streaming). **Apenas a estrutura foi aproveitada.** A
-referência usa degradê azul, destaque rosa, cantos arredondados, caixa mista e menu
-horizontal: todos os sete pontos contradizem o sistema adotado, e todos os sete foram
-resolvidos a favor do Lamborghini. Nenhuma marca de terceiros presente na referência
-é utilizada.
+Títulos em **caixa mista**, peso 700, entrelinha 1.05 e espaçamento entre letras de
+`-0.02em`. A versão anterior usava caixa alta com espaçamento muito aberto e foi
+apontada pelo autor como um dos problemas.
 
 ### Cantos
 
-`0px` em tudo — botões, cartões, imagens. Pôster de cinema é retangular; a regra cai bem.
+`8px` para selos e elementos pequenos, `12px` para cartões e pôsteres, `20px` (pílula)
+para botões e filtros.
+
+### Movimento
+
+Ao passar o mouse, o pôster **sobe 4px, cresce 5% e ganha sombra**. O sistema anterior
+proibia escala e deslocamento; o atual usa os dois, que é o que a referência faz e o
+que o autor esperava desde o início.
+
+### Densidade
+
+De 2 a 7 colunas conforme a largura da tela, com pôsteres de cerca de 200px dentro do
+contêiner de 1600px. A faixa vem do mercado: Letterboxd usa ~230px, MUBI ~200px,
+JustWatch ~150px. A primeira versão usava 4 colunas fixas, o que resultava em pôsteres
+de 440px numa tela de 1850px — o principal motivo de a tela parecer estranha.
+
+### Marcas de terceiros
+
+Nenhuma. A referência é um conceito com identidade da HBO; apenas a linguagem visual
+foi aproveitada. Nome, logotipo e marca da HBO não aparecem no app, assim como nada
+da Lamborghini.
 
 ## 8. Preparação para autenticação futura
 
@@ -290,7 +306,7 @@ Ferramenta: **Vitest**. Os testes são escritos **antes** do código que testam.
 - [ ] Link de "onde assistir" apontando para a página do TMDB, nunca direto para o streaming
 - [ ] Nenhum anúncio e nenhuma cobrança
 - [ ] Chave da API apenas em variável de ambiente do servidor, nunca no código nem no navegador
-- [ ] Nenhuma marca da Lamborghini utilizada (o sistema visual é referência; touro, nome e logotipos não entram)
+- [ ] Nenhuma marca de terceiros utilizada. As referências visuais (Lamborghini e o conceito com identidade da HBO) contribuíram apenas com linguagem visual; nomes e logotipos de ambas ficam fora do app
 
 ## 12. Caminho de evolução
 

@@ -1,24 +1,44 @@
 @import "tailwindcss";
 
+/*
+ * Sistema visual do ta-no-stream.
+ *
+ * Substitui o sistema preto-e-dourado da Lamborghini, que proibia cores,
+ * degrades, sombras e cantos arredondados — exatamente os recursos que a
+ * referencia escolhida pelo autor usa. Ver secao 7 da spec.
+ *
+ * A base e um azul-noite dessaturado, nao preto puro: azul escuro parece
+ * profundidade, preto chapado parece vazio. Sobre ele, um rosa-vermelho
+ * vibrante marca a acao principal.
+ */
 @theme {
-  /* Superficies — profundidade por troca de cor, nunca por sombra */
-  --color-abismo: #000000;
-  --color-fundo-profundo: #181818;
-  --color-superficie: #202020;
+  /* Superficies, do mais profundo ao mais elevado */
+  --color-noite: #0b1220;
+  --color-noite-media: #121c2e;
+  --color-superficie: #1b2537;
+  --color-superficie-alta: #243049;
 
   /* Texto */
-  --color-branco: #ffffff;
-  --color-cinza: #7d7d7d;
-  --color-cinza-claro: #969696;
+  --color-texto: #f5f7fa;
+  --color-texto-suave: #93a3bb;
+  --color-texto-fraco: #64748b;
 
-  /* Unica cor do sistema. So em "onde assistir" e filtro ativo. */
-  --color-dourado: #ffc000;
-  --color-dourado-escuro: #917300;
+  /* Acao principal — botoes e filtros ativos */
+  --color-destaque: #f0426b;
+  --color-destaque-forte: #d92e57;
+  --color-destaque-suave: #ff6d8c;
 
-  --font-display: var(--fonte-archivo), system-ui, sans-serif;
+  /* Apoio, usado com parcimonia em selos e notas */
+  --color-ouro: #f5b942;
+  --color-ciano: #35c3e0;
 
-  /* Cantos retos sao inegociaveis neste sistema */
-  --radius-none: 0px;
+  --font-display: var(--fonte-poppins), system-ui, sans-serif;
+  --font-corpo: var(--fonte-inter), system-ui, sans-serif;
+
+  /* Cantos arredondados: o oposto do sistema anterior */
+  --radius-suave: 8px;
+  --radius-medio: 12px;
+  --radius-grande: 20px;
 }
 
 html {
@@ -26,13 +46,34 @@ html {
 }
 
 body {
-  background-color: var(--color-abismo);
-  color: var(--color-branco);
+  /*
+   * Degrade sutil no topo: a pagina fica mais clara onde o conteudo comeca e
+   * escurece conforme desce, o que da sensacao de profundidade sem custar
+   * nenhum elemento na tela.
+   */
+  background-color: var(--color-noite);
+  background-image: linear-gradient(
+    180deg,
+    #16233a 0%,
+    var(--color-noite) 42%
+  );
+  background-attachment: fixed;
+  color: var(--color-texto);
+  font-family: var(--font-corpo);
 }
 
-/* Titulos de destaque: caixa alta, entrelinha apertada */
-.titulo-display {
-  text-transform: uppercase;
-  line-height: 0.92;
-  letter-spacing: -0.01em;
+/* Titulos: caixa mista, peso alto, entrelinha compacta */
+.titulo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Some com a barra de rolagem horizontal nas fileiras deslizantes */
+.sem-barra::-webkit-scrollbar {
+  display: none;
+}
+.sem-barra {
+  scrollbar-width: none;
 }

@@ -13,16 +13,16 @@ import { Conteiner } from '@/components/conteiner'
 export default function Erro({ reset }: { error: Error; reset: () => void }) {
   return (
     <Conteiner className="py-24">
-      <h1 className="titulo-display max-w-2xl text-2xl sm:text-3xl">
-        Nao conseguimos carregar os filmes
+      <h1 className="titulo max-w-2xl text-3xl sm:text-4xl">
+        Não conseguimos carregar os filmes
       </h1>
-      <p className="mt-4 max-w-xl text-sm leading-relaxed text-cinza">
-        A base de dados nao respondeu. Isso costuma ser temporario — tente de
+      <p className="mt-4 max-w-xl text-sm leading-relaxed text-texto-suave">
+        A base de dados não respondeu. Isso costuma ser temporário — tente de
         novo em alguns instantes.
       </p>
       <button
         onClick={reset}
-        className="mt-8 border border-branco/50 px-6 py-4 text-xs uppercase tracking-[0.15em] text-branco transition-colors hover:bg-superficie focus:outline-none focus:ring-2 focus:ring-branco"
+        className="mt-8 rounded-grande bg-destaque px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-destaque/25 transition-colors hover:bg-destaque-forte focus:outline-none focus:ring-2 focus:ring-destaque-suave focus:ring-offset-2 focus:ring-offset-noite"
       >
         Tentar de novo
       </button>

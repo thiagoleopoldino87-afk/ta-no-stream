@@ -23,6 +23,17 @@ export async function buscarFilmes(filtros: FiltrosUrl): Promise<PaginaDeFilmes>
   }
 }
 
+/**
+ * Endereco da pagina "onde assistir" do TMDB para um filme.
+ *
+ * Os termos de uso do TMDB proibem montar link direto para o streaming — a
+ * API nem fornece essa informacao. O caminho permitido e mandar a pessoa para
+ * a pagina deles, que lista os servicos disponiveis na regiao.
+ */
+export function urlOndeAssistir(idDoFilme: number): string {
+  return `https://www.themoviedb.org/movie/${idDoFilme}/watch?locale=BR`
+}
+
 export { normalizarFiltros } from './parametros'
 export type { FiltrosUrl }
 export type { ParametrosCrus } from './parametros'
