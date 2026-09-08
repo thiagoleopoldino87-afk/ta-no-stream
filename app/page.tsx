@@ -1,3 +1,4 @@
+import { Conteiner } from '@/components/conteiner'
 import { GradeFilmes } from '@/components/grade-filmes'
 import {
   buscarFilmes,
@@ -14,29 +15,30 @@ export default async function PaginaCatalogo({
   const { filmes } = await buscarFilmes(filtros)
 
   return (
-    <div className="px-6 py-10 md:px-10">
-      <h1 className="titulo-display text-4xl md:text-6xl">ta-no-stream</h1>
-      <p className="mt-3 text-cinza">
-        Filmes disponiveis por assinatura no Brasil agora.
+    <Conteiner className="py-10">
+      {/*
+       * O titulo descreve o CONTEUDO, nao repete o nome do app — esse ja esta
+       * no cabecalho. E fica em 24-30px, nao 72px: num catalogo, o maior
+       * elemento da tela tem que ser o filme, nunca o texto sobre ele.
+       */}
+      <h1 className="titulo-display text-2xl sm:text-3xl">Em alta agora</h1>
+      <p className="mt-2 text-sm text-cinza">
+        Os filmes mais populares disponiveis por assinatura no Brasil.
       </p>
 
-      <div className="mt-10">
-        {filmes.length > 0 ? (
-          <GradeFilmes filmes={filmes} />
-        ) : (
-          <EstadoVazio />
-        )}
+      <div className="mt-8">
+        {filmes.length > 0 ? <GradeFilmes filmes={filmes} /> : <EstadoVazio />}
       </div>
-    </div>
+    </Conteiner>
   )
 }
 
 /** Nenhum resultado nao e erro. E resposta valida, e precisa oferecer saida. */
 function EstadoVazio() {
   return (
-    <div className="border border-superficie p-10 text-center">
-      <p className="titulo-display text-2xl">Nenhum filme encontrado</p>
-      <p className="mt-3 text-cinza">
+    <div className="border border-superficie p-12 text-center">
+      <p className="titulo-display text-xl">Nenhum filme encontrado</p>
+      <p className="mt-3 text-sm text-cinza">
         Nao ha filmes que atendam a essa combinacao de filtros.
       </p>
     </div>
