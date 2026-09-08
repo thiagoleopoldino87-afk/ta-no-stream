@@ -1,7 +1,7 @@
 # ta-no-stream — Documento de Design
 
 **Data:** 2026-09-07
-**Status:** Aprovado, aguardando plano de implementação
+**Status:** Implementado, exceto busca por título e seletor "meus serviços"
 **Autor:** Thiago Leopoldino, com Claude
 
 ---
@@ -159,11 +159,18 @@ pedágio, e sem cadastro nem cobrança uma landing page não teria nada a conver
   larga (`backdrop_path`), título em caixa mista, ano, nota e o botão rosa
   "Onde assistir". **Só aparece na visão sem filtros:** assim que qualquer filtro é
   aplicado, o herói some e a grade assume a tela, porque quem filtra quer resultados.
-  Não custa chamada extra à API — é o primeiro resultado da própria consulta do
-  catálogo, e por isso ele é excluído da grade abaixo para não aparecer duas vezes.
-  Sem trailer embutido: o botão leva à ficha, onde o trailer vive.
-- **Filtros:** serviço, gênero, ano e nota. Barra horizontal visível no desktop; botão
-  "FILTROS" que abre gaveta no celular. O botão exibe a contagem de filtros ativos.
+  O filme vem do primeiro resultado da própria consulta do catálogo, e é excluído da
+  grade abaixo para não aparecer duas vezes.
+  **Custa uma chamada extra** a `/movie/{id}`, porque a lista do `/discover` não traz
+  duração, gêneros nem em quais serviços o filme está — e mostrar os streamings ali é
+  justamente o que dá utilidade à faixa. Fica em cache por 24h, e se falhar o herói
+  simplesmente não aparece, sem derrubar a página.
+  Dois botões: "Assistir agora" (página do TMDB) e "Ver detalhes" (a ficha).
+- **Filtros:** serviço, gênero e ano em listas suspensas; nota mínima em botões
+  (Todas / 7+ / 8+ / 9+). Ficam numa barra acima da grade que quebra em várias linhas
+  no celular. Os botões de nota são links comuns, sem JavaScript; só as listas
+  suspensas precisam de código no navegador, para navegar ao trocar a seleção.
+  Um link "Limpar filtros" aparece sempre que houver algum ativo.
 - **Busca:** ícone no cabeçalho. Ao buscar, a mesma página troca a fonte de dados e
   desabilita o filtro de serviço, explicando por quê.
 - **Grade:** 2 colunas no celular, 4 no desktop, com espaçamento generoso
