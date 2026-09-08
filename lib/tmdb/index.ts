@@ -1,7 +1,12 @@
 import { pedirAoTmdb } from './cliente'
 import { montarParametrosDescoberta, type FiltrosUrl } from './parametros'
-import { traduzirFilme } from './traduzir'
-import type { PaginaDeFilmes, RespostaDescoberta } from './tipos'
+import { traduzirFilme, traduzirFilmeDetalhado } from './traduzir'
+import type {
+  FilmeDetalhado,
+  FilmeDetalhadoTmdb,
+  PaginaDeFilmes,
+  RespostaDescoberta,
+} from './tipos'
 
 export const SEIS_HORAS = 60 * 60 * 6
 export const VINTE_E_QUATRO_HORAS = 60 * 60 * 24
@@ -24,6 +29,28 @@ export async function buscarFilmes(filtros: FiltrosUrl): Promise<PaginaDeFilmes>
 }
 
 /**
+ * Ficha completa de um filme.
+ *
+ * append_to_response traz elenco, videos e disponibilidade numa unica
+ * requisicao, em vez de quatro. Revalida a cada 24h: ficha de filme muda bem
+ * menos que a lista de populares.
+ */
+export async function buscarFilme(id: number): Promise<FilmeDetalhado> {
+  const parametros = new URLSearchParams({
+    language: 'pt-BR',
+    append_to_response: 'credits,videos,watch/providers',
+  })
+
+  const dados = await pedirAoTmdb<FilmeDetalhadoTmdb>(
+    `/movie/${id}`,
+    parametros,
+    VINTE_E_QUATRO_HORAS,
+  )
+
+  return traduzirFilmeDetalhado(dados)
+}
+
+/**
  * Endereco da pagina "onde assistir" do TMDB para um filme.
  *
  * Os termos de uso do TMDB proibem montar link direto para o streaming — a
@@ -37,5 +64,11 @@ export function urlOndeAssistir(idDoFilme: number): string {
 export { normalizarFiltros } from './parametros'
 export type { FiltrosUrl }
 export type { ParametrosCrus } from './parametros'
-export type { Filme, PaginaDeFilmes } from './tipos'
+export type {
+  Filme,
+  FilmeDetalhado,
+  OndeAssistir,
+  PaginaDeFilmes,
+  Provedor,
+} from './tipos'
 export { ErroTmdb } from './cliente'
