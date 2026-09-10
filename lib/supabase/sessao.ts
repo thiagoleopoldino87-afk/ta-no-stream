@@ -14,11 +14,24 @@ import { NextResponse, type NextRequest } from 'next/server'
  * visitantes anonimos quebraria o app inteiro.
  */
 export async function atualizarSessao(request: NextRequest) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const chave = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+  // Sem as variaveis, createServerClient lanca excecao sincrona e derrubaria
+  // TODA pagina do site, inclusive o catalogo, que nem usa banco. Preferimos
+  // seguir sem sessao: quem visita ve o catalogo, so nao consegue entrar.
+  if (!url || !chave) {
+    console.warn(
+      '[sessao] Variaveis do Supabase ausentes. Autenticacao desativada nesta requisicao.',
+    )
+    return NextResponse.next({ request })
+  }
+
   let respostaSupabase = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    url,
+    chave,
     {
       cookies: {
         getAll() {
