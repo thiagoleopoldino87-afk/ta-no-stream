@@ -22,7 +22,12 @@ export async function usuarioAtual(): Promise<Usuario | null> {
     if (!claims?.sub) return null
 
     return { id: String(claims.sub), email: String(claims.email ?? '') }
-  } catch {
+  } catch (erro) {
+    // Registrar antes de devolver null: sem isto, um erro real de configuracao
+    // ficaria indistinguivel de "Supabase fora do ar" e ninguem descobriria a
+    // causa. Devolver null segue certo — o catalogo nao pode cair por causa
+    // da sessao. Ver secao 9 da spec.
+    console.error('[usuario] Falha ao obter a sessao:', erro)
     return null
   }
 }
