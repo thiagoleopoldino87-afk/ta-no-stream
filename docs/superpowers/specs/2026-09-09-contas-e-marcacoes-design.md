@@ -39,12 +39,18 @@ dados. Sem dados no servidor, não há o que carregar.
 ## 3. Escopo
 
 ### Dentro
-- Cadastro e login por **e-mail e senha**
-- Login com **Google**
-- Recuperação de senha
+- Cadastro e login por **e-mail e senha**, sem confirmação de e-mail
+- Recuperação de senha (limitada, ver seção 12)
 - Duas marcações **mutuamente excludentes**: `quero_assistir` e `ja_assisti`
 - Três abas na navegação: Em alta, Quero assistir, Já assisti
 - Marcar a partir da ficha do filme e a partir do pôster na grade
+
+### Adiado (não cancelado)
+
+**Login com Google** e **envio de e-mail próprio**. Os dois dependem de configuração
+externa pesada — projeto no Google Cloud e um domínio comprado — e nenhum dos dois exige
+mudança de código: no Supabase são configuração de painel. Podem ser ligados a qualquer
+momento sem refazer nada.
 
 ### Fora (decidido de propósito)
 Nota pessoal do usuário, resenhas, listas personalizadas além das duas, seguir outras
@@ -55,12 +61,12 @@ pessoas, perfil público, avatar, exportar dados, notificações.
 | Decisão | Escolha | Por quê |
 |---|---|---|
 | Acesso sem conta | Catálogo aberto; login só para marcar | Quem chega pelo Google vê valor em 1 segundo e só cria conta se quiser guardar algo. Preserva a indexação e todo o trabalho já feito. |
-| Métodos de login | E-mail/senha **e** Google | Senha cobre quem não usa Google; Google elimina atrito para a maioria. O Supabase liga as duas identidades automaticamente quando o e-mail é o mesmo e está verificado. |
+| Métodos de login | **E-mail e senha** apenas, por ora | Google foi adiado: exige projeto no Google Cloud, tela de consentimento e URIs de retorno — cerca de 15 minutos de burocracia externa, sem nenhuma linha de código. Quando entrar, o Supabase liga as duas identidades automaticamente se o e-mail coincidir e estiver verificado. |
 | Relação entre as marcações | Excludentes | É como Letterboxd e JustWatch funcionam, porque é como as pessoas pensam: "quero ver" é uma pendência, e o que já foi visto saiu da pendência. Também simplifica tabela e abas. |
 | Abas quando deslogado | Visíveis; clicar mostra convite | O que está escondido não é descoberto. O convite aparece no momento em que a pessoa já demonstrou interesse. |
 | Serviço | Supabase | Banco e login no mesmo produto, RLS nativo, PostgreSQL padrão (conhecimento transferível). |
 | Conta Supabase | **Nova**, em `leopoldinofn87@gmail.com` | Separação total do `driveflowai`, cuja conta foi criada pelo Lovable e pode ser gerenciada por eles. O autor faz cada passo da configuração com as próprias mãos, que é parte do objetivo de aprendizado. |
-| Envio de e-mail | **Resend** como SMTP próprio | O serviço embutido do Supabase envia **2 e-mails por hora**. Com confirmação de e-mail ligada por padrão, isso significa 2 cadastros por hora no app inteiro. A própria documentação diz que aquele serviço é só para testes. |
+| Confirmação de e-mail | **Desligada** | O serviço de e-mail embutido do Supabase envia 2 mensagens por hora. Com a confirmação ligada, o app inteiro aceitaria 2 cadastros por hora. A saída seria um SMTP próprio, mas o Resend — e qualquer alternativa séria — exige **domínio comprado e verificado**, o que não se justifica num projeto de estudo. Desligar torna o cadastro instantâneo e não custa nada. |
 | Cookies de sessão | Padrão oficial do Supabase | Sair da receita documentada em autenticação costuma abrir buracos piores que o que se pretendia fechar. Ver limitação conhecida na seção 9. |
 | Limites de tentativa | Padrões do Supabase | 30 tentativas de login por 5 minutos por IP já barram ataque de força bruta, sem código nosso. |
 | Verificação do RLS | Testes automatizados contra projeto de testes na nuvem | Docker Desktop precisa de ~4 GB de memória; a máquina do autor tem 7,7 GB no total e 0,8 GB livre. Testar na nuvem entrega a mesma garantia sem instalar nada. |
@@ -146,7 +152,7 @@ Padrões do Supabase, confirmados na documentação em 2026-09-09:
 |---|---|---|
 | Login e cadastro | 30 por 5 min, por IP | Sim |
 | Renovação de sessão | 150 por 5 min, por IP | Sim |
-| E-mail de recuperação | 2/hora no serviço embutido | Resolvido pelo Resend |
+| E-mail de recuperação | 2/hora no serviço embutido | Não, sem SMTP próprio |
 
 Excedido o limite, a resposta é HTTP 429. Isso barra força bruta sem código nosso.
 
@@ -173,9 +179,14 @@ app/
 ├── quero-assistir/page.tsx     →  /quero-assistir   aba
 ├── ja-assisti/page.tsx         →  /ja-assisti       aba
 ├── entrar/page.tsx             →  /entrar           login e cadastro na mesma tela
-├── entrar/recuperar/page.tsx   →  redefinição de senha
-└── auth/callback/route.ts      →  retorno do login com Google
+└── entrar/recuperar/page.tsx   →  redefinição de senha
 middleware.ts                   →  renova a sessão a cada requisição
+```
+
+Quando o login com Google entrar, ele acrescenta uma rota `auth/callback/route.ts` para
+receber o retorno — nada do que existe precisa mudar.
+
+```
 ```
 
 Abas são **rotas**, não parâmetros: o link fica compartilhável, o botão voltar funciona,
@@ -241,8 +252,8 @@ marcar um filme.
 ### Tela de entrar
 
 Uma página com alternância entre "entrar" e "criar conta", em vez de duas rotas quase
-idênticas. Contém: e-mail, senha, botão principal, "Entrar com Google" e o link de
-recuperação.
+idênticas. Contém: e-mail, senha, botão principal e o link de recuperação. O botão
+"Entrar com Google" entra depois, no mesmo lugar.
 
 ## 9. Erros e estados
 
@@ -297,12 +308,15 @@ automatizado não dependa de caixa de entrada.
 Não podem ser feitos pelo assistente: exigem e-mail, senha e aceite de termos em nome
 do usuário.
 
-- [ ] Conta Supabase criada em `leopoldinofn87@gmail.com` ✅ **feito em 09/09/2026**
-- [ ] Projeto `ta-no-stream` criado (o do app)
-- [ ] Projeto `ta-no-stream-testes` criado (o dos testes, com confirmação de e-mail desligada)
-- [ ] Conta no Resend criada e SMTP configurado no projeto do app
-- [ ] Projeto no Google Cloud criado e credenciais de OAuth coladas no Supabase
+- [x] Conta Supabase criada em `leopoldinofn87@gmail.com` — 09/09/2026
+- [ ] Projeto `ta-no-stream` criado (o do app), com confirmação de e-mail desligada
+- [ ] Projeto `ta-no-stream-testes` criado, com confirmação de e-mail desligada
 - [ ] Variáveis do Supabase cadastradas no painel da Vercel
+
+Adiados, sem impacto em código:
+
+- [ ] Domínio próprio + SMTP, para liberar a recuperação de senha em escala
+- [ ] Projeto no Google Cloud, para o login com Google
 
 ## 12. Limites conhecidos
 
@@ -311,4 +325,6 @@ do usuário.
 | Projeto gratuito hiberna após 7 dias | Marcações indisponíveis até reativar no painel | Plano pago, ou uma visita semanal |
 | 2 projetos gratuitos por conta | App e testes ocupam as duas vagas | Plano pago, ou apagar o de testes quando não estiver usando |
 | Cookies não são `httpOnly` | Um XSS permitiria roubo de sessão | Migrar tudo para Server Actions |
+| Confirmação de e-mail desligada | Alguém pode se cadastrar com endereço que não é seu | Comprar domínio e ligar um SMTP próprio |
+| Recuperação de senha a 2/hora | A terceira pessoa a esquecer a senha na mesma hora fica sem o e-mail | Idem acima |
 | Lista com muitos filmes | Uma chamada ao TMDB por filme na primeira carga, limitada a 24 por página | Guardar título e pôster na tabela, respeitando o limite de 6 meses do TMDB |
