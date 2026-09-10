@@ -13,7 +13,7 @@ const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function validarEmail(email: string): string | null {
   const limpo = email.trim()
   if (limpo === '') return 'Informe seu e-mail.'
-  if (!FORMATO_EMAIL.test(limpo)) return 'E-mail invalido.'
+  if (!FORMATO_EMAIL.test(limpo)) return 'E-mail inválido.'
   return null
 }
 

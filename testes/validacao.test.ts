@@ -15,15 +15,15 @@ describe('validarEmail', () => {
   })
 
   test('recusa e-mail sem arroba', () => {
-    expect(validarEmail('thiagoexemplo.com')).toBe('E-mail invalido.')
+    expect(validarEmail('thiagoexemplo.com')).toBe('E-mail inválido.')
   })
 
   test('recusa e-mail sem dominio', () => {
-    expect(validarEmail('thiago@')).toBe('E-mail invalido.')
+    expect(validarEmail('thiago@')).toBe('E-mail inválido.')
   })
 
   test('recusa e-mail com espaco', () => {
-    expect(validarEmail('thi ago@exemplo.com')).toBe('E-mail invalido.')
+    expect(validarEmail('thi ago@exemplo.com')).toBe('E-mail inválido.')
   })
 
   test('ignora espacos em volta', () => {
