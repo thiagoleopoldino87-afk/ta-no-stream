@@ -1,6 +1,5 @@
 'use server'
 
-import { headers } from 'next/headers'
 import { validarEmail } from '@/lib/auth/validacao'
 import { criarClienteServidor } from '@/lib/supabase/servidor'
 import type { EstadoRecuperacao } from '@/lib/auth/tipos'
@@ -14,12 +13,19 @@ export async function pedirRecuperacao(
   const erro = validarEmail(email)
   if (erro) return { erro }
 
-  const cabecalhos = await headers()
-  const origem = cabecalhos.get('origin') ?? 'http://localhost:3000'
+  // O endereco vem de configuracao, NUNCA do cabecalho da requisicao. Quem faz
+  // a requisicao controla o cabecalho Origin e conseguiria fazer o link do
+  // e-mail apontar para outro site — a vitima receberia um e-mail legitimo e
+  // digitaria a senha nova na tela do atacante (password reset poisoning).
+  const site = process.env.SITE_URL
+  if (!site) {
+    console.error('[recuperacao] SITE_URL ausente. Nao e possivel montar o link.')
+    return { erro: 'Não foi possível enviar o link agora. Tente mais tarde.' }
+  }
 
   const supabase = await criarClienteServidor()
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origem}/auth/redefinir`,
+    redirectTo: `${site}/auth/redefinir`,
   })
 
   /*
