@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation'
 import { criarClienteServidor } from '@/lib/supabase/servidor'
 
 export type Usuario = { id: string; email: string }
@@ -23,10 +24,16 @@ export async function usuarioAtual(): Promise<Usuario | null> {
 
     return { id: String(claims.sub), email: String(claims.email ?? '') }
   } catch (erro) {
-    // Registrar antes de devolver null: sem isto, um erro real de configuracao
-    // ficaria indistinguivel de "Supabase fora do ar" e ninguem descobriria a
-    // causa. Devolver null segue certo — o catalogo nao pode cair por causa
-    // da sessao. Ver secao 9 da spec.
+    // O Next usa excecoes como sinal de controle: cookies() lanca
+    // DYNAMIC_SERVER_USAGE para avisar que a rota nao pode ser estatica.
+    // Isso nao e erro nosso e precisa continuar subindo, ou o Next perde o
+    // sinal e o log enche de alarme falso.
+    unstable_rethrow(erro)
+
+    // Daqui em diante e erro de verdade: chave errada, configuracao quebrada,
+    // Supabase fora do ar. Registrar antes de tratar como deslogado, senao a
+    // causa fica invisivel. Devolver null segue certo: o catalogo nao pode
+    // cair por causa da sessao. Ver secao 9 da spec.
     console.error('[usuario] Falha ao obter a sessao:', erro)
     return null
   }
