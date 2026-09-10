@@ -295,15 +295,15 @@ describe('validarEmail', () => {
   })
 
   test('recusa e-mail sem arroba', () => {
-    expect(validarEmail('thiagoexemplo.com')).toBe('E-mail invalido.')
+    expect(validarEmail('thiagoexemplo.com')).toBe('E-mail inválido.')
   })
 
   test('recusa e-mail sem dominio', () => {
-    expect(validarEmail('thiago@')).toBe('E-mail invalido.')
+    expect(validarEmail('thiago@')).toBe('E-mail inválido.')
   })
 
   test('recusa e-mail com espaco', () => {
-    expect(validarEmail('thi ago@exemplo.com')).toBe('E-mail invalido.')
+    expect(validarEmail('thi ago@exemplo.com')).toBe('E-mail inválido.')
   })
 
   test('ignora espacos em volta', () => {
@@ -360,7 +360,7 @@ const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function validarEmail(email: string): string | null {
   const limpo = email.trim()
   if (limpo === '') return 'Informe seu e-mail.'
-  if (!FORMATO_EMAIL.test(limpo)) return 'E-mail invalido.'
+  if (!FORMATO_EMAIL.test(limpo)) return 'E-mail inválido.'
   return null
 }
 
@@ -474,9 +474,9 @@ export async function criarConta(
 
   if (error) {
     if (error.message.toLowerCase().includes('already')) {
-      return { erro: 'Esse e-mail ja tem conta. Tente entrar.' }
+      return { erro: 'Esse e-mail já tem conta. Tente entrar.' }
     }
-    return { erro: 'Nao conseguimos criar sua conta. Tente de novo.' }
+    return { erro: 'Não conseguimos criar sua conta. Tente de novo.' }
   }
 
   // Como a confirmacao de e-mail esta desligada no projeto, o cadastro ja
@@ -919,7 +919,7 @@ export async function redefinirSenha(
   const { error } = await supabase.auth.updateUser({ password: senha })
 
   if (error) {
-    return { erro: 'O link expirou ou ja foi usado. Peca outro.' }
+    return { erro: 'O link expirou ou já foi usado. Peça outro.' }
   }
 
   revalidatePath('/', 'layout')
