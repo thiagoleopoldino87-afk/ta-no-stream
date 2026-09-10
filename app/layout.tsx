@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Conteiner } from '@/components/conteiner'
+import { MenuUsuario } from '@/components/menu-usuario'
 import './globals.css'
 
 /**
@@ -62,9 +63,7 @@ function Cabecalho() {
           tá no <span className="text-destaque">stream</span>
         </Link>
 
-        <p className="hidden text-sm text-texto-suave sm:block">
-          O que assistir hoje, por assinatura, no Brasil
-        </p>
+        <MenuUsuario />
       </Conteiner>
     </header>
   )
