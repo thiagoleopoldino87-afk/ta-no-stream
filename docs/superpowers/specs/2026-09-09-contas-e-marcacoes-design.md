@@ -180,7 +180,7 @@ app/
 ├── ja-assisti/page.tsx         →  /ja-assisti       aba
 ├── entrar/page.tsx             →  /entrar           login e cadastro na mesma tela
 └── entrar/recuperar/page.tsx   →  redefinição de senha
-middleware.ts                   →  renova a sessão a cada requisição
+proxy.ts                        →  renova a sessão a cada requisição
 ```
 
 Quando o login com Google entrar, ele acrescenta uma rota `auth/callback/route.ts` para
@@ -262,7 +262,7 @@ idênticas. Contém: e-mail, senha, botão principal e o link de recuperação. 
 | Senha errada **ou** e-mail inexistente | **A mesma mensagem** para os dois: "E-mail ou senha incorretos". Mensagens distintas permitiriam descobrir quem tem conta no site (enumeração de usuários) |
 | E-mail já cadastrado | "Esse e-mail já tem conta. Quer entrar?" com link direto |
 | **Supabase fora do ar ou hibernado** | O catálogo continua funcionando; apenas os botões de marcar somem, com aviso discreto |
-| Sessão expirada durante a navegação | O `middleware.ts` renova sozinho; se não conseguir, trata como deslogado, sem erro na tela |
+| Sessão expirada durante a navegação | O `proxy.ts` renova sozinho; se não conseguir, trata como deslogado, sem erro na tela |
 | Lista vazia | Estado vazio, não erro: "Sua fila está vazia. Marque filmes enquanto navega." |
 | Filme marcado sumiu do TMDB | Pula o item em silêncio |
 | Gravação da marcação falha | **Interface otimista com reversão**: o botão muda na hora; se a gravação falhar, volta ao estado anterior e avisa |
