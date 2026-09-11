@@ -11,9 +11,36 @@ import { beforeAll, describe, expect, test } from 'vitest'
 const URL_TESTES = process.env.SUPABASE_TESTES_URL!
 const CHAVE_TESTES = process.env.SUPABASE_TESTES_KEY!
 
+// Codigos de erro do PostgreSQL usados para conferir a CAUSA da falha, nao so
+// que "algo deu errado". Um expect(error).not.toBeNull() passaria mesmo se o
+// bloqueio viesse de um bug sem relacao com RLS (coluna errada, gatilho
+// quebrado) — e o teste afirmaria ter provado algo que nao provou.
+const CODIGO_VIOLACAO_RLS = '42501' // insufficient_privilege
+const CODIGO_VIOLACAO_UNICIDADE = '23505' // unique_violation
+const CODIGO_VIOLACAO_CHECK = '23514' // check_violation
+
+// Cada linha usa um filme_id proprio para nao disputar a mesma linha entre
+// testes, o que tornaria o resultado dependente da ordem de execucao. A unica
+// excecao deliberada e o teste de unicidade, que precisa mirar a MESMA linha
+// que a Alice ja tem, de proposito.
+const FILME_ALICE = 278
+const FILME_BRUNO = 27205
+const FILME_INSERCAO_ALHEIA = 550
+const FILME_STATUS_INVALIDO = 999
+
+// Contador para dar um storageKey unico a cada cliente. Sem isso, todo
+// createClient() usa a mesma chave de storage por padrao e o SDK acusa
+// "Multiple GoTrueClient instances detected" mesmo sem persistir sessao.
+let proximoRotulo = 0
+
 function clienteAnonimo() {
+  proximoRotulo += 1
   return createClient(URL_TESTES, CHAVE_TESTES, {
-    auth: { persistSession: false, autoRefreshToken: false },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      storageKey: `sb-teste-rls-${proximoRotulo}`,
+    },
   })
 }
 
@@ -43,21 +70,23 @@ describe('RLS da tabela marcacoes', () => {
     alice = await criarUsuario()
     bruno = await criarUsuario()
 
-    await alice.cliente
+    const { error: erroAlice } = await alice.cliente
       .from('marcacoes')
-      .insert({ usuario_id: alice.id, filme_id: 278, status: 'quero_assistir' })
+      .insert({ usuario_id: alice.id, filme_id: FILME_ALICE, status: 'quero_assistir' })
+    if (erroAlice) throw new Error(`Falha ao preparar marcacao da Alice: ${erroAlice.message}`)
 
-    await bruno.cliente
+    const { error: erroBruno } = await bruno.cliente
       .from('marcacoes')
-      .insert({ usuario_id: bruno.id, filme_id: 27205, status: 'ja_assisti' })
+      .insert({ usuario_id: bruno.id, filme_id: FILME_BRUNO, status: 'ja_assisti' })
+    if (erroBruno) throw new Error(`Falha ao preparar marcacao do Bruno: ${erroBruno.message}`)
   })
 
   test('cada um enxerga apenas a propria marcacao', async () => {
     const { data: daAlice } = await alice.cliente.from('marcacoes').select('filme_id')
     const { data: doBruno } = await bruno.cliente.from('marcacoes').select('filme_id')
 
-    expect(daAlice?.map((m) => m.filme_id)).toEqual([278])
-    expect(doBruno?.map((m) => m.filme_id)).toEqual([27205])
+    expect(daAlice?.map((m) => m.filme_id)).toEqual([FILME_ALICE])
+    expect(doBruno?.map((m) => m.filme_id)).toEqual([FILME_BRUNO])
   })
 
   test('pedir TODAS as linhas nao devolve as do outro', async () => {
@@ -70,9 +99,11 @@ describe('RLS da tabela marcacoes', () => {
   test('nao da para gravar uma marcacao em nome de outra pessoa', async () => {
     const { error } = await alice.cliente
       .from('marcacoes')
-      .insert({ usuario_id: bruno.id, filme_id: 550, status: 'quero_assistir' })
+      .insert({ usuario_id: bruno.id, filme_id: FILME_INSERCAO_ALHEIA, status: 'quero_assistir' })
 
-    expect(error).not.toBeNull()
+    // 42501 e a violacao de RLS. Conferir o codigo, e nao apenas "houve erro",
+    // impede o teste de passar por um motivo diferente do que afirma provar.
+    expect(error?.code).toBe(CODIGO_VIOLACAO_RLS)
   })
 
   test('nao da para apagar a marcacao de outra pessoa', async () => {
@@ -88,20 +119,22 @@ describe('RLS da tabela marcacoes', () => {
   })
 
   test('o mesmo filme nao pode ficar em dois estados', async () => {
+    // Mira de proposito a MESMA linha (FILME_ALICE) criada no beforeAll: e
+    // essa reincidencia que deve disparar a restricao de unicidade.
     const { error } = await alice.cliente
       .from('marcacoes')
-      .insert({ usuario_id: alice.id, filme_id: 278, status: 'ja_assisti' })
+      .insert({ usuario_id: alice.id, filme_id: FILME_ALICE, status: 'ja_assisti' })
 
     // Barrado pela restricao unique (usuario_id, filme_id)
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe(CODIGO_VIOLACAO_UNICIDADE)
   })
 
   test('status invalido e recusado pelo banco', async () => {
     const { error } = await alice.cliente
       .from('marcacoes')
-      .insert({ usuario_id: alice.id, filme_id: 999, status: 'ja_assistiu' })
+      .insert({ usuario_id: alice.id, filme_id: FILME_STATUS_INVALIDO, status: 'ja_assistiu' })
 
     // Barrado pela restricao check
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe(CODIGO_VIOLACAO_CHECK)
   })
 })

@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => ({
     environment: 'jsdom',
     // Os testes de RLS falam com um Supabase real, pela internet.
     testTimeout: 30000,
-    env: loadEnv(mode, process.cwd(), ''),
+    // So o prefixo usado pelos testes: evita jogar no process.env variaveis
+    // sensiveis sem relacao, como o token do TMDB e as chaves de producao.
+    env: loadEnv(mode, process.cwd(), 'SUPABASE_TESTES_'),
   },
 }))
