@@ -47,8 +47,8 @@ export async function atualizarSessao(request: NextRequest) {
           )
           // Cabecalhos de cache: impedem que uma CDN guarde a resposta e
           // entregue a sessao de uma pessoa para outra.
-          Object.entries(headers).forEach(([chave, valor]) =>
-            respostaSupabase.headers.set(chave, valor),
+          Object.entries(headers).forEach(([nomeDoCabecalho, valor]) =>
+            respostaSupabase.headers.set(nomeDoCabecalho, valor),
           )
         },
       },
