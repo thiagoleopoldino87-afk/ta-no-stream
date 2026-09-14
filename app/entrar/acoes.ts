@@ -22,10 +22,23 @@ export async function entrar(
   const erroDeFormato = validarEmail(email) ?? validarSenha(senha)
   if (erroDeFormato) return { erro: erroDeFormato }
 
-  const supabase = await criarClienteServidor()
-  const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
+  // So a chamada ao Supabase fica protegida — redirect() PRECISA ficar fora
+  // deste bloco. Ele funciona lancando uma excecao que o Next captura; um
+  // catch em volta dele engoliria o redirecionamento e o login pararia de
+  // funcionar em silencio.
+  let houveErro: boolean
+  try {
+    const supabase = await criarClienteServidor()
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
+    houveErro = Boolean(error)
+  } catch (erro) {
+    // Banco hibernado ou fora do ar: trata como se as credenciais estivessem
+    // erradas do ponto de vista da tela, mas registra a causa real no log.
+    console.error('[entrar] Falha ao contatar o Supabase:', erro)
+    return { erro: 'Não foi possível entrar agora. Tente novamente em instantes.' }
+  }
 
-  if (error) {
+  if (houveErro) {
     /*
      * A MESMA mensagem para senha errada e para e-mail inexistente, de
      * proposito. Distinguir permitiria testar enderecos e descobrir quem tem
@@ -47,11 +60,20 @@ export async function criarConta(
   const erroDeFormato = validarEmail(email) ?? validarSenha(senha)
   if (erroDeFormato) return { erro: erroDeFormato }
 
-  const supabase = await criarClienteServidor()
-  const { error } = await supabase.auth.signUp({ email, password: senha })
+  // Mesmo cuidado de entrar(): so a chamada ao Supabase entra no try, o
+  // redirect() fica fora para nao ser engolido pelo catch.
+  let erroSupabase: { message: string } | null
+  try {
+    const supabase = await criarClienteServidor()
+    const resultado = await supabase.auth.signUp({ email, password: senha })
+    erroSupabase = resultado.error
+  } catch (erro) {
+    console.error('[criarConta] Falha ao contatar o Supabase:', erro)
+    return { erro: 'Não foi possível criar sua conta agora. Tente novamente em instantes.' }
+  }
 
-  if (error) {
-    if (error.message.toLowerCase().includes('already')) {
+  if (erroSupabase) {
+    if (erroSupabase.message.toLowerCase().includes('already')) {
       return { erro: 'Esse e-mail já tem conta. Tente entrar.' }
     }
     return { erro: 'Não conseguimos criar sua conta. Tente de novo.' }

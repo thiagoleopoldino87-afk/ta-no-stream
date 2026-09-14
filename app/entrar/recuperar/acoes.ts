@@ -23,15 +23,35 @@ export async function pedirRecuperacao(
     return { erro: 'Não foi possível enviar o link agora. Tente mais tarde.' }
   }
 
-  const supabase = await criarClienteServidor()
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${site}/auth/redefinir`,
-  })
+  // O link do e-mail aponta para /auth/callback, que troca o "code" do
+  // Supabase por uma sessao de verdade antes de mandar a pessoa para
+  // /auth/redefinir. Sem essa troca, updateUser roda sem sessao.
+  const destino = encodeURIComponent('/auth/redefinir')
+
+  let erroSupabase: { message: string } | null
+  try {
+    const supabase = await criarClienteServidor()
+    const resultado = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${site}/auth/callback?destino=${destino}`,
+    })
+    erroSupabase = resultado.error
+  } catch (erro) {
+    console.error('[recuperacao] Falha ao contatar o Supabase:', erro)
+    return { erro: 'Não foi possível enviar o link agora. Tente mais tarde.' }
+  }
+
+  if (erroSupabase) {
+    // Nao mostramos isto na tela — confirmar a existencia do e-mail ou expor
+    // detalhe do erro permitiria descobrir quem tem conta no site, a mesma
+    // razao da mensagem generica no login. Mas registrar e essencial: e o que
+    // vai avisar quando o limite de 2 e-mails por hora estourar.
+    console.error('[recuperacao] Supabase recusou o envio:', erroSupabase.message)
+  }
 
   /*
-   * Responde "enviado" mesmo se o e-mail nao existir. Confirmar a existencia
-   * permitiria descobrir quem tem conta no site — a mesma razao da mensagem
-   * generica no login.
+   * Responde "enviado" mesmo se o e-mail nao existir ou o Supabase tiver
+   * recusado. Confirmar a existencia permitiria descobrir quem tem conta no
+   * site — a mesma razao da mensagem generica no login.
    */
   return { enviado: true }
 }

@@ -1,64 +1,30 @@
-'use client'
-
-import { useActionState } from 'react'
 import { Conteiner } from '@/components/conteiner'
-import type { EstadoRecuperacao } from '@/lib/auth/tipos'
-import { pedirRecuperacao } from './acoes'
+import { FormularioRecuperar } from '@/components/formulario-recuperar'
 
-const INICIAL: EstadoRecuperacao = {}
+export const metadata = { title: 'Recuperar senha — ta-no-stream' }
 
-export default function PaginaRecuperar() {
-  const [estado, enviar, enviando] = useActionState(pedirRecuperacao, INICIAL)
+/**
+ * Mapa fechado dos codigos de erro que app/auth/callback/route.ts pode
+ * mandar por aqui. Preferido a texto cru na URL: nao vaza detalhe interno
+ * e mantem a mensagem em portugues num unico lugar.
+ */
+function mensagemDoErro(codigo: string | undefined): string | undefined {
+  if (codigo === 'link-invalido') {
+    return 'O link expirou ou já foi usado. Peça um novo abaixo.'
+  }
+  return undefined
+}
+
+export default async function PaginaRecuperar({
+  searchParams,
+}: {
+  searchParams: Promise<{ erro?: string }>
+}) {
+  const { erro } = await searchParams
 
   return (
     <Conteiner className="py-20">
-      <div className="mx-auto w-full max-w-sm">
-        <h1 className="titulo text-3xl">Recuperar senha</h1>
-
-        {estado.enviado ? (
-          <p className="mt-4 rounded-medio border border-white/10 bg-superficie/60 px-4 py-4 text-sm leading-relaxed text-texto-suave">
-            Se existir uma conta com esse e-mail, enviamos um link para
-            redefinir a senha. Confira também a caixa de spam.
-          </p>
-        ) : (
-          <>
-            <p className="mt-2 text-sm text-texto-suave">
-              Informe seu e-mail e enviaremos um link para criar uma senha nova.
-            </p>
-
-            <form action={enviar} className="mt-8 space-y-4">
-              <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm text-texto-suave">
-                  E-mail
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  placeholder="seu@email.com"
-                  className="w-full rounded-medio border border-white/15 bg-white/5 px-4 py-3 text-sm text-texto outline-none focus:border-destaque"
-                />
-              </div>
-
-              {estado.erro && (
-                <p role="alert" className="text-sm text-destaque-suave">
-                  {estado.erro}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={enviando}
-                className="w-full rounded-grande bg-destaque px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-destaque-forte disabled:opacity-60"
-              >
-                {enviando ? 'Enviando...' : 'Enviar link'}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
+      <FormularioRecuperar avisoInicial={mensagemDoErro(erro)} />
     </Conteiner>
   )
 }
