@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run",
+    "test": "vitest run --exclude testes/rls.test.ts",
+    "test:rls": "vitest run testes/rls.test.ts",
     "test:observar": "vitest"
   },
   "dependencies": {

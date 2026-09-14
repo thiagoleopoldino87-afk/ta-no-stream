@@ -2,6 +2,17 @@ import { createClient } from '@supabase/supabase-js'
 import { beforeAll, describe, expect, test } from 'vitest'
 
 /*
+ * Este arquivo roda em "npm run test:rls", separado do "npm test" comum.
+ *
+ * Motivo: ele fala com um Supabase de verdade pela internet, entao (1) nao da
+ * para rodar offline, (2) sem SUPABASE_TESTES_URL/SUPABASE_TESTES_PUBLISHABLE_KEY
+ * configuradas a suite inteira fica vermelha por um motivo que nao e bug de
+ * codigo, e (3) toda execucao cria dois usuarios novos no banco de testes,
+ * que ninguem limpa automaticamente (decisao consciente, ver revisao final).
+ * Juntar isso ao "npm test" tornaria a suite normal fragil e lenta sem essa
+ * ligacao ficar obvia. Se reunificar os dois no futuro, resolva estes tres
+ * pontos primeiro.
+ *
  * Roda contra o PROJETO DE TESTES, nunca o do app.
  *
  * Usa a mesma chave publicavel que o navegador usa — nunca a service_role.
@@ -9,7 +20,7 @@ import { beforeAll, describe, expect, test } from 'vitest'
  * atacaria. Se ele nao passa, ninguem passa.
  */
 const URL_TESTES = process.env.SUPABASE_TESTES_URL!
-const CHAVE_TESTES = process.env.SUPABASE_TESTES_KEY!
+const CHAVE_TESTES = process.env.SUPABASE_TESTES_PUBLISHABLE_KEY!
 
 // Codigos de erro do PostgreSQL usados para conferir a CAUSA da falha, nao so
 // que "algo deu errado". Um expect(error).not.toBeNull() passaria mesmo se o
@@ -65,7 +76,9 @@ describe('RLS da tabela marcacoes', () => {
 
   beforeAll(async () => {
     if (!URL_TESTES || !CHAVE_TESTES) {
-      throw new Error('Faltam SUPABASE_TESTES_URL e SUPABASE_TESTES_KEY no .env.local')
+      throw new Error(
+        'Faltam SUPABASE_TESTES_URL e SUPABASE_TESTES_PUBLISHABLE_KEY no .env.local',
+      )
     }
     alice = await criarUsuario()
     bruno = await criarUsuario()
